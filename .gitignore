@@ -1,0 +1,4 @@
+debug/
+node_module/
+node_modules/
+config.js
