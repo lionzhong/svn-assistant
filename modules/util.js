@@ -139,6 +139,9 @@ const util = {
         }
 
     },
+
+    getRegion: (setting = false, defaultVal = false, splite = "_") => util.getDataType(setting, "object") && util.getDataType(setting.region, "string") ? `${splite}${setting.region}` : defaultVal,
+
     getDataType: (data, type) => {
 
         let result = false;

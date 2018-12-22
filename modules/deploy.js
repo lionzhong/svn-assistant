@@ -627,6 +627,7 @@ const deploy = () => {
 
     };
 
+    // 建立symlink是以平台为单位
     const symlinkPlatform = (data = []) => {
 
         if (data.length <= 0) { 
@@ -644,7 +645,7 @@ const deploy = () => {
 
         if (platforms.length > 0) {
 
-            platforms.forEach(platform => symlink.modules(platform.modules));
+            platforms.forEach(platform => symlink.modules(platform.modules, platform.rebuild.link));
 
         }
 
@@ -710,6 +711,7 @@ const deploy = () => {
         check: check,
         platforms: platforms,
         branches: branches,
+        symlinkPlatform: symlinkPlatform,
         allModules: allModules,
         allTrunks: allTrunks,
         allBranches: allBranches,

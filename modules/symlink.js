@@ -4,11 +4,36 @@ const util    = require('./util');
 
 const link = (source, target, sync, relink) => {
 
+    const tip = {
+        "success": () => {
+
+            log.time(`source: ${source} | target: ${target}`);
+            log.green(`Symlink created! \n`, true);
+
+        },
+        "failed": err => {
+            
+            console.log(err);
+            console.log('\n');
+            log.red(`Symlink failed! \n`, true);
+
+        }
+    };
+
     const doLink = () => {
 
         if (sync) {
 
-            fs.symlinkSync(source, target, 'dir');
+            try {
+
+                fs.symlinkSync(source, target, 'dir');
+                tip.success();
+
+            } catch (err) {
+
+                tip.failed(err);
+
+            }
 
         } else {
 
@@ -16,15 +41,11 @@ const link = (source, target, sync, relink) => {
 
                 if (err) {
 
-                    console.log(err);
-                    console.log('\n');
+                    tip.failed(err);
 
                 } else {
 
-                    let time = util.getTimeNow();
-
-                    log.time(` | source: ${source} | target: ${target}`);
-                    log.green(`${time} Symlink created! \n`, true);
+                    tip.success();
 
                 }
 
@@ -40,9 +61,15 @@ const link = (source, target, sync, relink) => {
 
             if (relink) {
 
-                log.time(`Symlink ${target} start rebuild...`);
+                log.time(`Symlink rebuild: Enabled`);
+                log.time(`Symlink ${target} start rebuild...\n`);
                 fs.unlinkSync(target);
                 doLink();
+
+            } else {
+
+                log.time(`Symlink rebuild: Disabled`);
+                log.time(`Symlink ${target} aleady exist, ignore rebuild!\n`);
 
             }
 

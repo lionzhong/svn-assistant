@@ -1,60 +1,128 @@
-const util    = require("./modules/util");
+
 const log     = require("./modules/log");
 const project = require("./modules/project");
 const deploy  = require("./modules/deploy");
 const runArg  = require("optimist").argv;
 
-const createFolders = async () => {
+const platformInit = (op = {}) => {
 
-    await util.folder.createConfig(project);
+    const key = (() => {
+
+        let result = {};
+
+        if (op.trunk) {
+
+            result = Object.assign(result, {
+                inProjet: "trunk",
+                inArg: "trunk"
+            });
+
+        } else if (op.branch) {
+
+            result = Object.assign(result, {
+                inProjet: "branches",
+                inArg: "branch"
+            });
+
+        }
+
+        return result;
+
+    })();
+
+    const data = runArg[key.inArg] === true ? project.svn.checkout[key.inProjet] : project.svn.checkout[key.inProjet].filter(platform => {
+
+        let flag = platform.name === runArg[key.inArg];
+
+        if (flag && key.inArg === "branch") {
+
+            flag = platform.version === runArg.version;
+
+        }
+
+        if (flag) {
+
+            flag = runArg.region ? platform.region === runArg.region : !platform.region;
+
+        }
+
+        return flag;
+        
+    });
+
+    if (data.length <= 0) {
+
+        if (runArg[key.inArg] === true) {
+
+            log.red(`配置中不存在任何${key.inArg}`);
+
+        } else {
+
+            log.red(`配置中不存在 ${key.inArg} ${runArg[key.inArg]} ${runArg.region ? runArg.region : ""}`);
+
+        }
+
+        process.exit();
+
+    }
+
+    (async () => {
+
+        // 如果参数中要求重新建立平台内软连接，则不会再deploy平台
+        if (!runArg.link) {
+
+            await deploy.platforms(data, {
+                tipType: "Trunk"
+            });
+            
+        }
+
+        deploy.symlinkPlatform(data);
+
+    })();
 
 };
 
-let init = () => {
+const init = () => {
 
     if (!runArg) {
 
         deploy.all();
 
     } else {
+        
+        // 只需要部署模块
+        if (runArg.modules === true && !runArg.trunk && !runArg.branch && !runArg.branches) {
 
-        if (runArg.trunk) {
+            deploy.allModules();
 
-            let data = runArg.trunk === "all" ? project.svn.checkout.trunk : project.svn.checkout.trunk.filter(platform => {
+        } else if (runArg.trunk) {
 
-                let flag = platform.name === runArg.trunk;
+            if (runArg.trunk === true) {
 
-                if (flag && runArg.region) {
+                deploy.allTrunks();
 
-                    flag = platform.region === runArg.region;
+            } else {
 
-                }
+                platformInit({ trunk: true });
 
-                return flag;
-                
-            });
+            }
+            
+        } else if (runArg.branch) {
 
-            if (data.length <= 0) {
+            if (!runArg.version) {
 
-                if (runArg.trunk === "all") {
+                log.red(`操作分支时，必须带上版本号参数，例如: --version=1.0.0.0`, true);
 
-                    log.red(`配置中不存在任何trunk`);
+            } else {
 
-                } else {
-
-                    log.red(`配置中不存在 trunk ${runArg.trunk} ${runArg.region ? runArg.region : ""}`);
-
-                }
-
-                process.exit();
+                platformInit({ branch: true });
 
             }
 
-            deploy.platforms(data, {
-                tipType: "Trunk"
-            });
+        } else if (runArg.branches) {
 
-        } else if (runArg.branche) {
+            deploy.allBranches();
 
         }
 
@@ -62,8 +130,4 @@ let init = () => {
 
 };
 
-createFolders().then(() => {
-
-    init();
-
-});
+init();

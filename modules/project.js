@@ -14,9 +14,7 @@ const util = require('./util');
 const path = require('path');
 let config = require('../config');
 
-const modules = () => {
-
-    const getRegion = (setting, defaultVal) => util.getDataType(setting, "object") && util.getDataType(setting.region, "string") ? `_${setting.region}` : defaultVal;
+const project = () => {
 
     config.services = Array.isArray(config.services) ? _.uniq(config.services).map(key => key.toLowerCase()) : [];
     config.bootstrap = ["saomai", "prapiroon"];
@@ -29,10 +27,8 @@ const modules = () => {
 
             config.deploy[key].forEach(obj => {
 
-                const region = getRegion(obj, "");
-                const {
-                    platform
-                } = obj;
+                const region = util.getRegion(obj, "");
+                const { platform } = obj;
 
                 // 基于saomai的平台，将不会再处理prapiroon
                 if (obj.baseOnSaomai === true && obj.prapiroon) {
@@ -118,7 +114,7 @@ const modules = () => {
 
                     if (Array.isArray(config.services) && config.services.length > 0) {
 
-                        let region = getRegion(op.setting, "");
+                        let region = util.getRegion(op.setting, "");
 
                         config.services.forEach(moduleCode => {
 
@@ -152,7 +148,7 @@ const modules = () => {
 
                     if (Array.isArray(op.setting.modules) && op.setting.modules.length > 0) {
 
-                        let region = getRegion(op.setting, "");
+                        let region = util.getRegion(op.setting, "");
 
                         config.services.forEach(moduleCode => {
 
@@ -318,7 +314,7 @@ const modules = () => {
                 
                 }
 
-                let region = getRegion(setting, "");
+                let region = util.getRegion(setting, "");
 
                 if (region !== "") {
 
@@ -473,13 +469,27 @@ const modules = () => {
 
                 config.deploy[key].forEach(setting => {
 
-                    const region = getRegion(setting, "");
+                    const region = util.getRegion(setting, "");
 
-                    config.svn.checkout.modules.push({
-                        name: setting.platform,
-                        url: `${config.svn.url}/${_.capitalize(setting.platform)}/trunk/html${region}`,
-                        folder: path.join(config.svn.folder.modules, `${setting.platform}${region}`)
-                    });
+                    const obj = (() => {
+
+                        let result = {
+                            name: setting.platform,
+                            url: `${config.svn.url}/${_.capitalize(setting.platform)}/trunk/html${region}`,
+                            folder: path.join(config.svn.folder.modules, `${setting.platform}${region}`)
+                        };
+
+                        if (region !== "") {
+
+                            result = Object.assign(result, { region: setting.region });
+    
+                        }
+
+                        return result;
+
+                    })();
+
+                    config.svn.checkout.modules.push(obj);
 
                 });
             
@@ -540,6 +550,7 @@ const modules = () => {
     const init = () => {
 
         parseFolderPath();
+        util.folder.createConfig(config);
         getSvnCheckoutUrl();
 
         if (config.debug === true) {
@@ -550,10 +561,18 @@ const modules = () => {
     
     };
 
+    // const createFolders = async () => {
+
+    //     await util.folder.createConfig(config);
+    
+    // };
+
+    // createFolders().finally(() => init());
+
     init();
 
     return config;
 
 };
 
-module.exports = modules();
+module.exports = project();
