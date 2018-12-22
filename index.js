@@ -2,6 +2,7 @@
 const log     = require("./modules/log");
 const project = require("./modules/project");
 const deploy  = require("./modules/deploy");
+const update  = require("./modules/update");
 const runArg  = require("optimist").argv;
 
 const platformInit = (op = {}) => {
@@ -71,13 +72,41 @@ const platformInit = (op = {}) => {
         // 如果参数中要求重新建立平台内软连接，则不会再deploy平台
         if (!runArg.link) {
 
-            await deploy.platforms(data, {
-                tipType: "Trunk"
-            });
-            
+            if (runArg.update === true) {
+
+                await update.platforms(data, op);
+                
+            } else {
+
+                await deploy.platforms(data, {
+                    tipType: (() => {
+
+                        let str = "";
+
+                        if (op.trunk) {
+
+                            str = "Trunk";
+                            
+                        } else if (op.branch) {
+
+                            str = "Branch";
+
+                        }
+
+                        return str;
+
+                    })()
+                });
+
+            }
+
         }
 
-        deploy.symlinkPlatform(data);
+        if (!runArg.update === true) {
+
+            deploy.symlinkPlatform(data);
+            
+        }
 
     })();
 
@@ -85,22 +114,46 @@ const platformInit = (op = {}) => {
 
 const init = () => {
 
-    if (!runArg.trunk && !runArg.branch && !runArg.update) {
+    if (!runArg.trunk && !runArg.branch) {
 
-        deploy.all();
+        if (!runArg.update) {
+
+            deploy.all();
+
+        } else {
+
+            update.all();
+
+        }
 
     } else {
         
-        // 只需要部署模块
         if (runArg.modules === true && !runArg.trunk && !runArg.branch && !runArg.branches) {
 
-            deploy.allModules();
+            // 只需要部署模块
+            if (runArg.update === true) {
+
+                update.allModules();
+
+            } else {
+
+                deploy.allModules();
+
+            }
 
         } else if (runArg.trunk) {
 
             if (runArg.trunk === true) {
 
-                deploy.allTrunks();
+                if (runArg.update === true) {
+
+                    update.allTrunks();
+
+                } else {
+
+                    deploy.allTrunks();
+
+                }
 
             } else {
 
@@ -122,7 +175,15 @@ const init = () => {
 
         } else if (runArg.branches) {
 
-            deploy.allBranches();
+            if (runArg.update === true) {
+
+                update.allBranches();
+                
+            } else {
+
+                deploy.allBranches();
+
+            }
 
         }
 

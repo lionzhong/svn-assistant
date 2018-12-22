@@ -281,7 +281,13 @@ const update = () => {
 
     };
 
-    const allTrunk = () => {
+    const allModules = () => {
+
+        return modules(project.svn.checkout.modules);
+
+    };
+
+    const allTrunks = () => {
 
         return platforms(project.svn.checkout.trunk, { trunk: true });
 
@@ -293,11 +299,21 @@ const update = () => {
 
     };
 
+    const all = async () => {
+
+        await allModules();
+        await allTrunks();
+        await allBranches();
+
+    };
+
     return {
         modules: modules,
         platforms: platforms,
-        allTrunk: allTrunk,
+        allModules: allModules,
+        allTrunks: allTrunks,
         allBranches: allBranches,
+        all: all,
         do: doUpdate
     };
 
