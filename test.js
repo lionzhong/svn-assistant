@@ -6,6 +6,8 @@ const runArg  = require("optimist").argv;
 const path    = require("path");
 const svnUltimate = require('node-svn-ultimate');
 
-const data = project.svn.checkout.modules;
+// const data = project.svn.checkout.modules;
 
-update.modules(data);
+// update.modules(data);
+
+update.allBranches();

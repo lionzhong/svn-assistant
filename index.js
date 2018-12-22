@@ -85,7 +85,7 @@ const platformInit = (op = {}) => {
 
 const init = () => {
 
-    if (!runArg) {
+    if (!runArg.trunk && !runArg.branch && !runArg.update) {
 
         deploy.all();
 
