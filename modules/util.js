@@ -115,7 +115,7 @@ const util = {
 
         return result;
     },
-    
+
     getTimeNow: () => {
         return moment(new Date().getTime()).format("YYYY-MM-DD HH:mm:ss");
     },
@@ -227,7 +227,20 @@ const util = {
         availableArr: data => {
             return Array.isArray(data) && data.length > 0;
         }
+    },
+
+    getSvnParams: () => {
+        const params = {};
+
+        Object.keys(config.svn.params).forEach(key => {
+            if (config.svn.params[key] !== "") {
+                params[key] = config.svn.params[key];
+            }
+        });
+
+        return params;
     }
+
 };
 
 module.exports = util;

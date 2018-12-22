@@ -32,7 +32,7 @@ const check = (set, targetFolder, op) => {
         },
 
         doCheck: (resolve, reject) => {
-            svnUltimate.commands.checkout(`${set.url}`, `${targetFolder}`, function (err) {
+            svnUltimate.commands.checkout(`${set.url}`, `${targetFolder}`, util.getSvnParams(), err => {
                 if (!err) {
                     log.time(`${set.url} ${targetFolder}`);
                     log.green(`${_.capitalize(op.tipStr ? op.tipStr : set.name)} checkout complete!`, true);

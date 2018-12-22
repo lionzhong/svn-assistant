@@ -1,8 +1,8 @@
-
 const log     = require("./modules/log");
 const project = require("./modules/project");
 const deploy  = require("./modules/deploy");
 const update  = require("./modules/update");
+const cleanup = require("./modules/cleanup");
 const runArg  = require("optimist").argv;
 
 const platformInit = (op = {}) => {
@@ -80,7 +80,7 @@ const init = () => {
     if (!runArg.trunk && !runArg.branch) {
         if (!runArg.update) {
             deploy.all();
-        } else {
+        } else if (!runArg.cleanup) {
             update.all();
         }
     } else {

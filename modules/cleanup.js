@@ -7,8 +7,8 @@ const project     = require("./project");
 
 const update = () => {
     const defaultTipEnd = {
-        success: "update complete!",
-        failed: "update failed!"
+        success: "cleanup complete!",
+        failed: "cleanup failed!"
     };
 
     const doUpdate = (module = false, op = {}) => {
@@ -37,7 +37,7 @@ const update = () => {
                 return false;
             }
 
-            svnUltimate.commands.update(module.folder, util.getSvnParams(), err => {
+            svnUltimate.commands.cleanup(module.folder, util.getSvnParams(), err => {
                 if (!err) {
                     log.time(`${module.folder}`);
                     log.green(util.getDataType(op.success, "function") ? op.success(module) : defaultTipEnd.success, true);
