@@ -490,8 +490,17 @@ const deploy = () => {
         return promise;
     };
 
-    const branches = () => {
+    const branches = (data = []) => {
+        const promise = platforms(data, {
+            tipType: "Branch",
+            isBranches: true
+        });
 
+        promise.then(() => {
+            symlinkPlatform(data);
+        });
+
+        return promise;
     };
 
     const allBranches = () => {

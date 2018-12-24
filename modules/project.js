@@ -1,5 +1,5 @@
 /**
- * svn 工具项目配置
+ * 配置解析
  *
  * @param {Array} moduleNames - 需要check/update的模块
  *
@@ -435,20 +435,13 @@ const project = () => {
     const init = () => {
         parseFolderPath();
         util.folder.createConfig(config);
+
         getSvnCheckoutUrl();
 
         if (config.debug === true) {
             util.output.json("./debug/config_export.json", config);
         }
     };
-
-    // const createFolders = async () => {
-
-    //     await util.folder.createConfig(config);
-    
-    // };
-
-    // createFolders().finally(() => init());
 
     init();
 

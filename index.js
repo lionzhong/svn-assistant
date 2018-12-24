@@ -1,120 +1,60 @@
-const log     = require("./modules/log");
-const project = require("./modules/project");
-const deploy  = require("./modules/deploy");
-const update  = require("./modules/update");
-const cleanup = require("./modules/cleanup");
-const runArg  = require("optimist").argv;
+/**
+ * 使用说明
+ * 
+ * 此工具使用命令行操作，指令说明如下
+ * 
+ * 主指令
+ *  =======================================
+ * --deploy --update --cleanup
+ * 
+ * --deploy：
+ * 
+ * 此指令用于部署moudules，trunk，branches到对应目录，可组合使用。
+ * 
+ * 模块部署：
+ *  =======================================
+ * checkout all modules to project/modules
+ * 
+ *  --deploy --module
+ * 
+ * checkout one module to project/modules
+ * 
+ *  --deploy --module=nangka
+ *  --deploy --module=nangka --region=ap
+ * 
+ * trunk平台部署:
+ * =======================================
+ * checkout all platforms to project/trunk
+ * 
+ *  --deploy --trunk
+ * 
+* checkout multiple platforms to project/trunk
+ * 
+ *  --deploy --trunk=krosa
+ *  --deploy --trunk=krosa --region=ap
+ * 
+ *  只有填写region才会部署对应区域平台
+ * 
+ * branches 分支部署:
+ * =======================================
+ * checkout all branches to project/branches
+ * 
+ *  --deploy --branch
+ * 
+ * checkout multiple branches to project/branches
+ * 
+ *  --deploy --branch=krosa 不区分版本，但不包括区域的指定平台
+ *  --deploy --branch=krosa --version=2.0.5.0 指定对应版本对应平台
+ *  --deploy --branch=krosa --region=ap 不区分版本，包括区域的指定平台
+ *  --deploy --branch=krosa --version=2.0.5.0 --region=ap 指定对应版本，对应区域，对应平台
+ * 
+ *  只有填写region才会部署对应区域平台
+ * 
+ * update/cleanup 操作
+ * =======================================
+ * 操作方式和trunk,branches操作完全一致，切换主指令即可
+ */
 
-const platformInit = (op = {}) => {
-    const key = (() => {
-        let result = {};
+const command = require("./modules/command");
 
-        if (op.trunk) {
-            result = Object.assign(result, {
-                inProjet: "trunk",
-                inArg: "trunk"
-            });
-        } else if (op.branch) {
-            result = Object.assign(result, {
-                inProjet: "branches",
-                inArg: "branch"
-            });
-        }
-
-        return result;
-    })();
-
-    const data = runArg[key.inArg] === true ? project.svn.checkout[key.inProjet] : project.svn.checkout[key.inProjet].filter(platform => {
-        let flag = platform.name === runArg[key.inArg];
-
-        if (flag && key.inArg === "branch") {
-            flag = platform.version === runArg.version;
-        }
-
-        if (flag) {
-            flag = runArg.region ? platform.region === runArg.region : !platform.region;
-        }
-
-        return flag;
-    });
-
-    if (data.length <= 0) {
-        if (runArg[key.inArg] === true) {
-            log.red(`配置中不存在任何${key.inArg}`);
-        } else {
-            log.red(`配置中不存在 ${key.inArg} ${runArg[key.inArg]} ${runArg.region ? runArg.region : ""}`);
-        }
-
-        process.exit();
-    }
-
-    (async () => {
-        // 如果参数中要求重新建立平台内软连接，则不会再deploy平台
-        if (!runArg.link) {
-            if (runArg.update === true) {
-                await update.platforms(data, op);
-            } else {
-                await deploy.platforms(data, {
-                    tipType: (() => {
-                        let str = "";
-
-                        if (op.trunk) {
-                            str = "Trunk";
-                        } else if (op.branch) {
-                            str = "Branch";
-                        }
-
-                        return str;
-                    })()
-                });
-            }
-        }
-
-        if (!runArg.update === true) {
-            deploy.symlinkPlatform(data);
-        }
-    })();
-};
-
-const init = () => {
-    if (!runArg.trunk && !runArg.branch) {
-        if (!runArg.update) {
-            deploy.all();
-        } else if (!runArg.cleanup) {
-            update.all();
-        }
-    } else {
-        if (runArg.modules === true && !runArg.trunk && !runArg.branch && !runArg.branches) {
-            // 只需要部署模块
-            if (runArg.update === true) {
-                update.allModules();
-            } else {
-                deploy.allModules();
-            }
-        } else if (runArg.trunk) {
-            if (runArg.trunk === true) {
-                if (runArg.update === true) {
-                    update.allTrunks();
-                } else {
-                    deploy.allTrunks();
-                }
-            } else {
-                platformInit({ trunk: true });
-            }
-        } else if (runArg.branch) {
-            if (!runArg.version) {
-                log.red(`操作分支时，必须带上版本号参数，例如: --version=1.0.0.0`, true);
-            } else {
-                platformInit({ branch: true });
-            }
-        } else if (runArg.branches) {
-            if (runArg.update === true) {
-                update.allBranches();
-            } else {
-                deploy.allBranches();
-            }
-        }
-    }
-};
-
-init();
+command();
