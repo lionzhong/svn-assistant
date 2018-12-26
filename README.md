@@ -3,8 +3,7 @@
 ## 安装
 
 ```javascript
-npm install -g git+ssh://git@10.5.24.110:zhongwanglin/svn-assistant.git
-npm install -g git+http://10.5.24.110/zhongwanglin/svn-assistant.git
+npm install -g git+https://github.com/lionzhong/svn-assistant.git
 ```
 
 ## 使用说明
