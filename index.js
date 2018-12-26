@@ -55,6 +55,6 @@
  * 操作方式和trunk,branches操作完全一致，切换主指令即可
  */
 
-const command = require("./modules/command");
+const command = require("./src/command");
 
 command();

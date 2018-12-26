@@ -1,18 +1,21 @@
 {
-  "name": "svn-assistant",
-  "version": "1.0.0",
-  "description": "",
+  "name": "ns-svn-assistant",
+  "version": "0.1.0",
+  "description": "前端SVN助手，提供一键check/update/cleanup模块，平台。混合部署平台到本地",
   "main": "index.js",
+  "bin": {
+    "nsvn": "./bin/cmd.js"
+  },
   "dependencies": {
     "chalk": "^2.4.1",
+    "commander": "^2.19.0",
     "lodash": "^4.17.11",
     "moment": "^2.22.2",
     "node-svn-ultimate": "^1.1.0",
-    "optimist": "^0.6.1",
     "rimraf": "^2.6.2"
   },
   "devDependencies": {
-    "eslint": "^5.10.0",
+    "eslint": "^5.11.0",
     "eslint-plugin-import": "^2.14.0",
     "eslint-plugin-node": "^8.0.0",
     "eslint-plugin-promise": "^4.0.1",

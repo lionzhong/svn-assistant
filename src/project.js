@@ -9,10 +9,11 @@
  *
  * @param {Object} svn - svn配置数据集合
  * */
+
 const _    = require('lodash');
-const util = require('./util');
 const path = require('path');
-let config = require('../config');
+const util = require('./util');
+let config = util.getConfig();
 
 const project = () => {
     config.services = Array.isArray(config.services) ? _.uniq(config.services).map(key => key.toLowerCase()) : [];
@@ -417,28 +418,13 @@ const project = () => {
         parseModulesCheckout();
     };
 
-    const parseFolderPath = () => {
-        Object.keys(config.svn.folder).forEach(key => {
-            switch (key) {
-
-                case "project":
-                    config.svn.folder[key] = path.normalize(config.svn.folder.project);
-                    break;
-                default:
-                    config.svn.folder[key] = path.normalize(path.join(config.svn.folder.project, key));
-                    break;
-
-            }
-        });
-    };
-
     const init = () => {
-        parseFolderPath();
-        util.folder.createConfig(config);
+        config.svn.folder = util.folder.getProjectPath(config);
 
         getSvnCheckoutUrl();
 
         if (config.debug === true) {
+            util.folder.create("./debug");
             util.output.json("./debug/config_export.json", config);
         }
     };
